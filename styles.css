@@ -1,30 +1,4 @@
-/* Global Styles */
-:root {}
-
-/* Light Mode */
-:root[data-theme='light'] {
-    --primary-color: #4a6cf7;
-    --secondary-color: #6c5ce7;
-    --accent-color: #00cec9;
-    --dark-color: #2d3436;
-    --light-color: #f5f6fa;
-    --gray-color: #95a5a6;
-    --white-color: #ffffff;
-    --transition: all 0.3s ease;
-}
-
-/* Dark Mode */
-:root[data-theme='dark'] {
-    --primary-color: #6c5ce7;
-    --secondary-color: #4a6cf7;
-    --accent-color: #00cec9;
-    --dark-color: #f5f6fa;
-    --light-color: #2d3436;
-    --gray-color: #a4b0be;
-    --white-color: #2d3436;
-    --transition: all 0.3s ease;
-}
-
+/* Global Styles - Optimized Variables */
 :root {
     --primary-color: #4a6cf7;
     --secondary-color: #6c5ce7;
@@ -34,6 +8,21 @@
     --gray-color: #95a5a6;
     --white-color: #ffffff;
     --transition: all 0.3s ease;
+}
+
+/* Light Mode */
+:root[data-theme='light'] {
+    /* Light mode uses default variables */
+}
+
+/* Dark Mode */
+:root[data-theme='dark'] {
+    --primary-color: #6c5ce7;
+    --secondary-color: #4a6cf7;
+    --dark-color: #f5f6fa;
+    --light-color: #2d3436;
+    --gray-color: #a4b0be;
+    --white-color: #2d3436;
 }
 
 * {
@@ -147,9 +136,8 @@ body {
     transform: translateY(-2px) scale(1.03);
 }
 
-.menu-toggle {
+.menu-toggle, .theme-toggle {
     cursor: pointer;
-    background: rgba(255, 255, 255, 0.15);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.2);
@@ -158,32 +146,44 @@ body {
     height: 40px;
     border-radius: 50%;
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
+}
+
+.menu-toggle {
+    background: rgba(255, 255, 255, 0.15);
+    flex-direction: column;
     padding: 5px;
     margin-left: -2px;
 }
 
 .theme-toggle {
     background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     color: var(--white-color);
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
     margin-right: 2px;
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .theme-toggle:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* Button Styles - Optimized */
+.btn-primary, .btn-secondary {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-primary:hover, .btn-secondary:hover {
     transform: translateY(-3px);
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
 }
@@ -200,34 +200,20 @@ body {
 
 :root[data-theme='light'] .btn-primary {
     background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     color: var(--primary-color);
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 :root[data-theme='light'] .btn-primary:hover {
     background: rgba(255, 255, 255, 0.25);
-    transform: translateY(-3px);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
 }
 
 :root[data-theme='light'] .btn-secondary {
     background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     color: var(--dark-color);
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 :root[data-theme='light'] .btn-secondary:hover {
     background: rgba(255, 255, 255, 0.25);
-    transform: translateY(-3px);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
 }
 
 /* Dark mode specific styles */

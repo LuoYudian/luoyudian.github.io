@@ -123,22 +123,40 @@ function initTheme() {
     });
 }
 
-// Get GitHub User Info
+// Get GitHub User Info with caching
 async function getGitHubUserInfo(username) {
+    // Check for cached data
+    const cachedData = localStorage.getItem(`github_user_${username}`);
+    if (cachedData) {
+        return JSON.parse(cachedData);
+    }
+
     try {
         const response = await fetch(`https://api.github.com/users/${username}`);
         if (!response.ok) {
             throw new Error('Failed to fetch GitHub user data');
         }
-        return await response.json();
+        const data = await response.json();
+        // Cache for 1 hour
+        localStorage.setItem(`github_user_${username}`, JSON.stringify(data));
+        setTimeout(() => {
+            localStorage.removeItem(`github_user_${username}`);
+        }, 3600000);
+        return data;
     } catch (error) {
         console.error('Error fetching GitHub user info:', error);
         return null;
     }
 }
 
-// Get GitHub Repositories
+// Get GitHub Repositories with caching
 async function getGitHubRepos(username, userAvatar = null) {
+    // Check for cached data
+    const cachedData = localStorage.getItem(`github_repos_${username}`);
+    if (cachedData) {
+        return JSON.parse(cachedData);
+    }
+
     try {
         const response = await fetch(`https://api.github.com/users/${username}/repos?sort=updated&per_page=6`);
         if (!response.ok) {
@@ -147,11 +165,19 @@ async function getGitHubRepos(username, userAvatar = null) {
         const repos = await response.json();
         
         // Add image URLs for each repo
-        return repos.map(repo => ({
+        const reposWithImages = repos.map(repo => ({
             ...repo,
             // Use user avatar if provided, otherwise use picsum.photos
             imageUrl: userAvatar ? userAvatar : `https://picsum.photos/seed/${repo.id}/400/300`
         }));
+
+        // Cache for 1 hour
+        localStorage.setItem(`github_repos_${username}`, JSON.stringify(reposWithImages));
+        setTimeout(() => {
+            localStorage.removeItem(`github_repos_${username}`);
+        }, 3600000);
+
+        return reposWithImages;
     } catch (error) {
         console.error('Error fetching GitHub repos:', error);
         // Provide fallback data if API fails
@@ -220,7 +246,7 @@ function displayGitHubUserInfo(userData) {
     });
 }
 
-// Display GitHub Repositories
+// Display GitHub Repositories with lazy loading for images
 function displayGitHubRepos(repos) {
     const projectGrid = document.querySelector('.project-grid');
     if (!projectGrid) return;
@@ -243,7 +269,7 @@ function displayGitHubRepos(repos) {
         
         projectCard.innerHTML = `
             <div class="project-image">
-                <img src="${repo.imageUrl}" alt="${repo.name}" class="project-img">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect width='400' height='300' fill='%23f0f0f0'/%3E%3C/svg%3E" data-src="${repo.imageUrl}" alt="${repo.name}" class="project-img lazyload">
             </div>
             <div class="project-content">
                 <h3 class="project-title">${repo.name}</h3>
@@ -259,10 +285,49 @@ function displayGitHubRepos(repos) {
         
         projectGrid.appendChild(projectCard);
     });
+
+    // Initialize lazy loading for project images
+    const lazyLoadImages = () => {
+        const lazyImages = document.querySelectorAll('.lazyload');
+        
+        if ('IntersectionObserver' in window) {
+            const imageObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const image = entry.target;
+                        image.src = image.dataset.src;
+                        image.classList.remove('lazyload');
+                        imageObserver.unobserve(image);
+                    }
+                });
+            });
+
+            lazyImages.forEach(image => {
+                imageObserver.observe(image);
+            });
+        } else {
+            // Fallback for browsers without IntersectionObserver
+            lazyImages.forEach(image => {
+                image.src = image.dataset.src;
+                image.classList.remove('lazyload');
+            });
+        }
+    };
+
+    lazyLoadImages();
 }
 
 // Initialize
-window.addEventListener('DOMContentLoaded', async () => {
+window.addEventListener('DOMContentLoaded', () => {
+    // Initialize critical functionality immediately
+    initCriticalFeatures();
+
+    // Lazy load non-critical functionality after a short delay
+    setTimeout(initNonCriticalFeatures, 500);
+});
+
+// Initialize critical features that need to load immediately
+function initCriticalFeatures() {
     initAnimation();
     animateOnScroll();
     initTheme();
@@ -270,16 +335,21 @@ window.addEventListener('DOMContentLoaded', async () => {
     // Set current active link
     const currentPath = window.location.hash || '#home';
     document.querySelector(`.nav-link[href="${currentPath}"]`).classList.add('active');
-    
+}
+
+// Initialize non-critical features that can be lazy loaded
+async function initNonCriticalFeatures() {
     // Get and display GitHub user info
     const githubUserData = await getGitHubUserInfo('curnel');
     displayGitHubUserInfo(githubUserData);
 
-    // Get and display GitHub repositories
+    // Extract user avatar URL
     const userAvatar = githubUserData ? githubUserData.avatar_url : null;
+
+    // Get and display GitHub repositories
     const githubRepos = await getGitHubRepos('curnel', userAvatar);
     displayGitHubRepos(githubRepos);
-});
+}
 
 // Listen for scroll events
 window.addEventListener('scroll', animateOnScroll);
